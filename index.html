@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10101b">
+<title>Raman Musical Zone</title>
+<style>
+:root{--bg:#0b0b13;--panel:#151522;--panel2:#1d1d2d;--text:#f7f5ff;--muted:#aaa8bd;--accent:#b68cff;--accent2:#ff75b7}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#34204d 0,transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{padding:26px 6vw 22px;border-bottom:1px solid #ffffff18;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{font-size:clamp(23px,4vw,34px);font-weight:800;letter-spacing:.3px}.brand span{color:var(--accent)}
+nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none;font-size:14px}nav a:hover{color:white}
+main{max-width:1120px;margin:auto;padding:34px 20px 70px}.hero{padding:34px 28px;border:1px solid #ffffff18;border-radius:24px;background:linear-gradient(120deg,#29203c,#171725 65%);margin-bottom:26px}
+.eyebrow{color:#d1b8ff;text-transform:uppercase;font-size:12px;letter-spacing:2px;font-weight:bold}.hero h1{font-size:clamp(34px,7vw,58px);margin:12px 0}.hero p{color:var(--muted);max-width:620px;line-height:1.6}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.btn{border:0;border-radius:12px;padding:12px 17px;background:var(--accent);color:#160e23;font-weight:700;cursor:pointer}.btn.secondary{background:#ffffff14;color:white;border:1px solid #ffffff25}
+.tools{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}.search{flex:1;min-width:210px;background:var(--panel);border:1px solid #ffffff20;color:white;border-radius:12px;padding:14px;font-size:15px}.upload{display:inline-flex;align-items:center;gap:8px}
+h2{font-size:23px;margin:28px 0 14px}.hint{color:var(--muted);font-size:13px;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}.card{background:var(--panel);border:1px solid #ffffff15;border-radius:17px;overflow:hidden}.thumb{height:130px;background:linear-gradient(135deg,#3c2757,#20203a);display:grid;place-items:center;font-size:42px}.body{padding:15px}.body h3{margin:0 0 7px;font-size:17px;overflow-wrap:anywhere}.meta{color:var(--muted);font-size:12px;margin-bottom:13px}.player{width:100%;margin:8px 0}.card-actions{display:flex;gap:8px;flex-wrap:wrap}.small{font-size:12px;padding:9px 11px;border-radius:9px}.empty{padding:26px;border:1px dashed #ffffff30;border-radius:15px;color:var(--muted);text-align:center}
+footer{border-top:1px solid #ffffff18;padding:25px 20px;text-align:center;color:var(--muted);font-size:13px}
+input[type=file]{display:none}.tag{display:inline-block;background:#ffffff12;color:#d8c6ff;padding:5px 9px;border-radius:30px;font-size:11px;margin-bottom:8px}
+@media(max-width:600px){header{padding:20px}.hero{padding:25px 20px}main{padding:24px 15px 50px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Raman <span>Musical Zone</span></div>
+  <nav><a href="#home">Home</a><a href="#library">Music Library</a><a href="#about">About</a></nav>
+</header>
+<main id="home">
+  <section class="hero">
+    <div class="eyebrow">Your music • Your vibe</div>
+    <h1>Feel the <span style="color:var(--accent)">Music.</span></h1>
+    <p>Welcome to Raman Musical Zone — a simple place to explore audio and video. Search your library, play your media, and download files you have permission to share.</p>
+    <div class="actions">
+      <button class="btn" onclick="document.getElementById('mediaFiles').click()">＋ Add audio / video</button>
+      <a class="btn secondary" href="#library" style="text-decoration:none">Explore library ↓</a>
+    </div>
+  </section>
+  <section id="library">
+    <h2>Music & Video Library</h2>
+    <div class="tools">
+      <input id="search" class="search" type="search" placeholder="Search songs or videos..." aria-label="Search media">
+      <label class="btn upload" for="mediaFiles">＋ Upload files</label>
+      <input id="mediaFiles" type="file" accept="audio/*,video/*" multiple>
+    </div>
+    <p class="hint">Tip: Add audio/video files from your device. They play in this browser session. To make media available to everyone online, host your own or licensed files and add their links to your website.</p>
+    <div id="mediaGrid" class="grid"></div>
+    <div id="empty" class="empty">No media added yet. Tap “Add audio / video” to select your own files.</div>
+  </section>
+  <section id="about">
+    <h2>About Raman Musical Zone</h2>
+    <p class="hint">An independent music and video space. Please upload or share only content you created, own, or have permission to distribute.</p>
+  </section>
+</main>
+<footer>© <span id="year"></span> Raman Musical Zone · Made for music lovers</footer>
+<script>
+const picker=document.getElementById('mediaFiles'), grid=document.getElementById('mediaGrid'), search=document.getElementById('search'), empty=document.getElementById('empty');
+const items=[]; document.getElementById('year').textContent=new Date().getFullYear();
+function size(bytes){if(bytes<1024*1024)return (bytes/1024).toFixed(0)+' KB';return (bytes/1024/1024).toFixed(1)+' MB'}
+function render(){
+  const q=search.value.trim().toLowerCase();grid.innerHTML='';
+  const shown=items.filter(x=>x.file.name.toLowerCase().includes(q));
+  empty.style.display=shown.length?'none':'block';
+  shown.forEach(x=>{
+    const video=x.file.type.startsWith('video/');
+    const card=document.createElement('article');card.className='card';
+    const thumb=document.createElement('div');thumb.className='thumb';thumb.textContent=video?'▶️':'♫';
+    const body=document.createElement('div');body.className='body';
+    const tag=document.createElement('span');tag.className='tag';tag.textContent=video?'VIDEO':'AUDIO';
+    const title=document.createElement('h3');title.textContent=x.file.name;
+    const meta=document.createElement('div');meta.className='meta';meta.textContent=size(x.file.size);
+    const player=document.createElement(video?'video':'audio');player.className='player';player.controls=true;player.preload='metadata';player.src=x.url;if(video)player.playsInline=true;
+    const actions=document.createElement('div');actions.className='card-actions';
+    const dl=document.createElement('a');dl.className='btn small';dl.href=x.url;dl.download=x.file.name;dl.textContent='Download';
+    actions.append(dl);body.append(tag,title,meta,player,actions);card.append(thumb,body);grid.append(card);
+  });
+}
+picker.addEventListener('change',e=>{
+  [...e.target.files].forEach(file=>{
+    if(!file.type.startsWith('audio/')&&!file.type.startsWith('video/'))return;
+    items.push({file,url:URL.createObjectURL(file)});
+  });render();picker.value='';
+});
+search.addEventListener('input',render);
+window.addEventListener('beforeunload',()=>items.forEach(x=>URL.revokeObjectURL(x.url)));
+</script>
+</body>
+</html>
